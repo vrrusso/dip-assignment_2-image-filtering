@@ -7,17 +7,31 @@
 import numpy as np
 import imageio as im
 
+def euclidian_distance(x1,y1,x2,y2):
+    return ((x1-x2)**2+(y1-y2)**2)**(0.5)
 
 def padding_image(input_img, filter_size):
     adjustment=int(np.floor(filter_size/2))
     return np.pad(input_img,pad_width=adjustment,mode='constant')
 
+def gaussian_kernel(sigma, x):
+    return (1/(2*np.pi*(sigma**2)))*(np.e**(-1*((x**2)/(2*(sigma**2)))))
+
+def spatial_gaussian_component(sigma,size):
+    filter = np.zeros((size,size))
+    for i in range(0,size):
+        for j in range(0,size):
+            filter[i][j] = gaussian_kernel(sigma,euclidian_distance(i-1,0,j-1,0))
+    return filter
+
+
 #this functions gets the parameters for each method and calls for the tranformation itself
 def apply_bilateral_filter(input_img):
     filter_size = int(input())
     padded_image = padding_image(input_img,filter_size)
-    sigma_row = float(input())
-    sigma_col = float(input())
+    sigma_s = float(input())
+    sigma_r = float(input())
+    filter = spatial_gaussian_component(sigma_s,filter_size)
     #return bilateral_filter(input_img,sigma_row,sigma_col)
     return padded_image
 
