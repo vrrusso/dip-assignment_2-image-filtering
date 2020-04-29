@@ -7,6 +7,8 @@
 import numpy as np
 import imageio as im
 
+
+#this functions are some utilitaries used in the calculations
 def euclidian_distance(x1,y1,x2,y2):
     return ((x1-x2)**2+(y1-y2)**2)**(0.5)
 
@@ -55,6 +57,7 @@ input_img = im.imread(filename)
 method = int(input())
 save_option = int(input())
 
+#apply the correct filter to the image
 transformed_image = (methods[method-1])(input_img)
 
 if save_option == 1:
