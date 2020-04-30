@@ -6,9 +6,18 @@
 #
 import numpy as np
 import imageio as im
+import math
 
 
 #this functions are some utilitaries used in the calculations
+def rse(in_img, out_img):
+    k,l = in_img.shape
+    s = 0.0
+    for i in range(k):
+        for j in range(l):
+            s += (float(out_img[i][j])-float(in_img[i][j]))**2
+    return math.sqrt(s)
+
 def euclidian_distance(x1,y1,x2,y2):
     return ((x1-x2)**2+(y1-y2)**2)**(0.5)
 
@@ -28,7 +37,7 @@ def spatial_gaussian_component(sigma,size):
 
 def convolution(img, f):
     #output image
-    out_img = np.zeros(img.shape, dtype=np.uint8)
+    out_img = np.zeros(img.shape)
 
     #fliping the filter in
     f_flip = np.flip(np.flip(f,0),1)
@@ -50,12 +59,12 @@ def convolution(img, f):
 
             out_img[(x-fa),(y-fb)] = np.sum(np.multiply(img_region, f_flip))
 
-    return out_img.astype(np.uint8)
+    return out_img
 
 def normalization(img):
-    m = (img.astype(np.int32)).min()
-    M = (img.astype(np.int32)).max()
-    return (((img-m)*255)/M).astype(np.uint8)
+    m = img.min()
+    M = img.max()
+    return (((img-m)*255.0)/M)
 
 #this functions gets the parameters for each method and calls for the tranformation itself
 def apply_bilateral_filter(input_img):
@@ -76,12 +85,14 @@ def apply_laplacian_filter(input_img):
     if(kn_option == 1):
         img_aux = convolution(input_img, kernel1)
     else:
-        img_aux = convolution(input_img, kernel1)
+        img_aux = convolution(input_img, kernel2)
 
+    img_aux = normalization(img_aux)
+    img_aux = (c * img_aux) + input_img
     img_aux = normalization(img_aux)
 
 
-    return 0
+    return img_aux
 
 def apply_vignette_filter(input_img):
     print('vignette')
@@ -101,6 +112,8 @@ save_option = int(input())
 
 #apply the correct filter to the image
 transformed_image = (methods[method-1])(input_img)
+
+print("%.4f" % (rse(input_img,transformed_image)))
 
 if save_option == 1:
     im.imwrite('output_img.png',transformed_image)
