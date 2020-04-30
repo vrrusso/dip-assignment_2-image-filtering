@@ -26,6 +26,36 @@ def spatial_gaussian_component(sigma,size):
             filter[i][j] = gaussian_kernel(sigma,euclidian_distance(i-1,0,j-1,0))
     return filter
 
+def convolution(img, f):
+    #output image
+    out_img = np.zeros(img.shape, dtype=np.uint8)
+
+    #fliping the filter in
+    f_flip = np.flip(np.flip(f,0),1)
+
+    #getting the dimensios of the filter
+    f_n,f_m= f.shape
+
+    fa = int((f_n-1)/2)
+    fb = int((f_m-1)/2)
+
+    #padding the image and getting its dimensions
+    pd_img = padding_image(img, f_n)
+    pd_img_n,pd_img_m = pd_img.shape
+
+    for x in range(fa, (pd_img_n-fa)):
+        for y in range(fb, (pd_img_m - fb)):
+
+            img_region = pd_img[ x-fa:x+(fa+1), y-fb:y+(fb+1)]
+
+            out_img[(x-fa),(y-fb)] = np.sum(np.multiply(img_region, f_flip))
+
+    return out_img.astype(np.uint8)
+
+def normalization(img):
+    m = (img.astype(np.int32)).min()
+    M = (img.astype(np.int32)).max()
+    return (((img-m)*255)/M).astype(np.uint8)
 
 #this functions gets the parameters for each method and calls for the tranformation itself
 def apply_bilateral_filter(input_img):
@@ -38,7 +68,19 @@ def apply_bilateral_filter(input_img):
     return padded_image
 
 def apply_laplacian_filter(input_img):
-    print('laplacian')
+    kernel1 = np.matrix([[0,-1,0], [-1,4,-1], [0,-1,0]])
+    kernel2 = np.matrix([[-1,-1,-1], [-1,8,-1], [-1,-1,-1]])
+    c = float(input())
+    kn_option = int(input())
+
+    if(kn_option == 1):
+        img_aux = convolution(input_img, kernel1)
+    else:
+        img_aux = convolution(input_img, kernel1)
+
+    img_aux = normalization(img_aux)
+
+
     return 0
 
 def apply_vignette_filter(input_img):
@@ -62,5 +104,3 @@ transformed_image = (methods[method-1])(input_img)
 
 if save_option == 1:
     im.imwrite('output_img.png',transformed_image)
-
-
