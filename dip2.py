@@ -28,6 +28,32 @@ def padding_image(input_img, filter_size):
 def gaussian_kernel(sigma, x):
     return (1/(2*np.pi*(sigma**2)))*(np.e**(-1*((x**2)/(2*(sigma**2)))))
 
+def vignette(img, sigma1, sigma2):
+    n, m = img.shape
+
+    #crating the tow 1D kernels
+    gauss_row = np.zeros((n, 1), dtype = float)
+    gauss_col = np.zeros((1, m), dtype = float)
+
+    #calculating the kernels' center
+    a = int((n-1)/2)
+    b = int((m-1)/2)
+
+    #calculating the values
+    for i in range(0, n):
+        gauss_row[i,0] = gaussian_kernel(sigma1, i-a)
+
+    for i in range(0, m):
+        gauss_col[0,i] = gaussian_kernel(sigma2, i-b)
+
+    #multiplying the tow arrays to creatr a gaussian matrix
+    f = np.matmul(gauss_row , gauss_col)
+
+    #multiplying the original image by the filter
+    img_out = np.multiply(img, f)
+
+    return img_out
+
 def spatial_gaussian_component(sigma,size):
     filter = np.zeros((size,size))
     for i in range(0,size):
@@ -89,14 +115,18 @@ def apply_laplacian_filter(input_img):
 
     img_aux = normalization(img_aux)
     img_aux = (c * img_aux) + input_img
-    img_aux = normalization(img_aux)
+    img_out = normalization(img_aux)
 
 
-    return img_aux
+    return img_out
 
 def apply_vignette_filter(input_img):
-    print('vignette')
-    return 0
+    sigma1 = float(input())
+    sigma2 = float(input())
+    img_aux = vignette(input_img,sigma1,sigma2)
+    img_out = normalization(img_aux)
+
+    return img_out
 
 #puts the function in an array, so i can call them only once without if-else structures
 methods = [apply_bilateral_filter, apply_laplacian_filter, apply_vignette_filter]
