@@ -56,10 +56,20 @@ def vignette(img, sigma1, sigma2):
 
 def spatial_gaussian_component(sigma,size):
     filter = np.zeros((size,size))
+    a = int(size/2)
     for i in range(0,size):
         for j in range(0,size):
-            filter[i][j] = gaussian_kernel(sigma,euclidian_distance(i-1,0,j-1,0))
+            filter[i][j] = gaussian_kernel(sigma,euclidian_distance(i-a,0,j-a,0))
     return filter
+
+
+def range_gaussian_component(img,sigma,size,x,y):
+    range_gaussian = np.zeros((size,size))
+    center_intensity = img[x][y]
+    a = int(size/2)
+    neighbor_intensities = img[x-a:x+a+1,y-a:y+a+1]
+    range_gaussian = gaussian_kernel(sigma,center_intensity - neighbor_intensities)
+    return range_gaussian
 
 def convolution(img, f):
     #output image
@@ -87,20 +97,50 @@ def convolution(img, f):
 
     return out_img
 
+def bilateral_filter(input_img, spatial_gaussian,sigma_r):
+    #output image
+    out_img = np.zeros(input_img.shape)
+
+    #fliping the filter in
+    f_flip = np.flip(np.flip(spatial_gaussian,0),1)
+
+    #getting the dimensios of the filter
+    f_n,f_m= spatial_gaussian.shape
+
+    fa = int((f_n-1)/2)
+    fb = int((f_m-1)/2)
+
+    #padding the image and getting its dimensions
+    pd_img = padding_image(input_img, f_n)
+    pd_img_n,pd_img_m = pd_img.shape
+
+    for x in range(fa, (pd_img_n-fa)):
+        for y in range(fb, (pd_img_m - fb)):
+            final_intensity, wp = 0,0
+            range_gaussian = range_gaussian_component(pd_img,sigma_r,f_n,x,y)
+            w_filter = f_flip * np.flip(np.flip(range_gaussian,0),1)
+            wp = np.sum(w_filter)
+            img_region = pd_img[ x-fa:x+(fa+1), y-fb:y+(fb+1)]
+            final_intensity = np.sum(np.multiply(img_region, w_filter))
+            out_img[(x-fa),(y-fb)] = final_intensity/wp
+    return out_img
+
+
 def normalization(img):
     m = img.min()
     M = img.max()
     return (((img-m)*255.0)/M)
 
+
+
 #this functions gets the parameters for each method and calls for the tranformation itself
 def apply_bilateral_filter(input_img):
     filter_size = int(input())
-    padded_image = padding_image(input_img,filter_size)
+    #padded_image = padding_image(input_img,filter_size)
     sigma_s = float(input())
     sigma_r = float(input())
-    filter = spatial_gaussian_component(sigma_s,filter_size)
-    #return bilateral_filter(input_img,sigma_row,sigma_col)
-    return padded_image
+    spatial_gaussian = spatial_gaussian_component(sigma_s,filter_size)
+    return bilateral_filter(input_img,spatial_gaussian,sigma_r)
 
 def apply_laplacian_filter(input_img):
     kernel1 = np.matrix([[0,-1,0], [-1,4,-1], [0,-1,0]])
