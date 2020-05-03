@@ -59,7 +59,7 @@ def spatial_gaussian_component(sigma,size):
     a = int(size/2)
     for i in range(0,size):
         for j in range(0,size):
-            filter[i][j] = gaussian_kernel(sigma,euclidian_distance(i-a,0,j-a,0))
+            filter[i][j] = gaussian_kernel(sigma,euclidian_distance(i-a,j-a,0,0))
     return filter
 
 
@@ -68,7 +68,7 @@ def range_gaussian_component(img,sigma,size,x,y):
     center_intensity = img[x][y]
     a = int(size/2)
     neighbor_intensities = img[x-a:x+a+1,y-a:y+a+1]
-    range_gaussian = gaussian_kernel(sigma,center_intensity - neighbor_intensities)
+    range_gaussian = gaussian_kernel(sigma,neighbor_intensities.astype(np.float64)-float(center_intensity))
     return range_gaussian
 
 def convolution(img, f):
@@ -105,24 +105,24 @@ def bilateral_filter(input_img, spatial_gaussian,sigma_r):
     f_flip = np.flip(np.flip(spatial_gaussian,0),1)
 
     #getting the dimensios of the filter
-    f_n,f_m= spatial_gaussian.shape
+    filter_size= spatial_gaussian.shape[0]
 
-    fa = int((f_n-1)/2)
-    fb = int((f_m-1)/2)
+    fa = int((filter_size-1)/2)
 
     #padding the image and getting its dimensions
-    pd_img = padding_image(input_img, f_n)
+    pd_img = padding_image(input_img, filter_size)
     pd_img_n,pd_img_m = pd_img.shape
 
     for x in range(fa, (pd_img_n-fa)):
-        for y in range(fb, (pd_img_m - fb)):
-            final_intensity, wp = 0,0
-            range_gaussian = range_gaussian_component(pd_img,sigma_r,f_n,x,y)
-            w_filter = f_flip * np.flip(np.flip(range_gaussian,0),1)
+        for y in range(fa, (pd_img_m - fa)):
+            final_intensity, wp = [0,0]
+            range_gaussian = range_gaussian_component(pd_img,sigma_r,filter_size,x,y)
+            w_filter = spatial_gaussian * range_gaussian
+            w_filter = np.flip(np.flip(w_filter,0),1)
             wp = np.sum(w_filter)
-            img_region = pd_img[ x-fa:x+(fa+1), y-fb:y+(fb+1)]
+            img_region = pd_img[ x-fa:x+(fa+1), y-fa:y+(fa+1)]
             final_intensity = np.sum(np.multiply(img_region, w_filter))
-            out_img[(x-fa),(y-fb)] = final_intensity/wp
+            out_img[(x-fa),(y-fa)] = final_intensity/wp
     return out_img
 
 
@@ -136,7 +136,6 @@ def normalization(img):
 #this functions gets the parameters for each method and calls for the tranformation itself
 def apply_bilateral_filter(input_img):
     filter_size = int(input())
-    #padded_image = padding_image(input_img,filter_size)
     sigma_s = float(input())
     sigma_r = float(input())
     spatial_gaussian = spatial_gaussian_component(sigma_s,filter_size)
@@ -186,4 +185,4 @@ transformed_image = (methods[method-1])(input_img)
 print("%.4f" % (rse(input_img,transformed_image)))
 
 if save_option == 1:
-    im.imwrite('output_img.png',transformed_image)
+    im.imwrite('output_img.png',transformed_image.astype(np.uint8))
