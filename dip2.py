@@ -98,14 +98,15 @@ def convolution(img, f):
     return out_img
 
 def bilateral_filter(input_img, spatial_gaussian,sigma_r):
+
+    input_img = input_img.astype(np.float64)
+
     #output image
     out_img = np.zeros(input_img.shape)
 
-    #fliping the filter in
-    f_flip = np.flip(np.flip(spatial_gaussian,0),1)
 
     #getting the dimensios of the filter
-    filter_size= spatial_gaussian.shape[0]
+    filter_size = spatial_gaussian.shape[0]
 
     fa = int((filter_size-1)/2)
 
@@ -117,9 +118,8 @@ def bilateral_filter(input_img, spatial_gaussian,sigma_r):
     for x in range(fa, (pd_img_n-fa)):
         for y in range(fa, (pd_img_m - fa)):
             final_intensity, wp = [0,0]
-            range_gaussian = range_gaussian_component(pd_img.astype(np.float64),sigma_r,filter_size,x,y)
+            range_gaussian = range_gaussian_component(pd_img,sigma_r,filter_size,x,y)
             w_filter = spatial_gaussian * range_gaussian
-            w_filter = np.flip(np.flip(w_filter,0),1)
             wp = np.sum(w_filter)
             img_region = pd_img[ x-fa:x+(fa+1), y-fa:y+(fa+1)]
             final_intensity = np.sum(np.multiply(img_region, w_filter))
@@ -130,7 +130,7 @@ def bilateral_filter(input_img, spatial_gaussian,sigma_r):
 def normalization(img):
     m = img.min()
     M = img.max()
-    return (((img-m)*255.0)/M)
+    return (((img-m)*255.0)/(M-m))
 
 
 
