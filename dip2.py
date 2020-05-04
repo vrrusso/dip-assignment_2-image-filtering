@@ -66,9 +66,9 @@ def spatial_gaussian_component(sigma,size):
 def range_gaussian_component(img,sigma,size,x,y):
     range_gaussian = np.zeros((size,size))
     center_intensity = img[x][y]
-    a = int(size/2)
+    a = int((size-1)/2)
     neighbor_intensities = img[x-a:x+a+1,y-a:y+a+1]
-    range_gaussian = gaussian_kernel(sigma,neighbor_intensities.astype(np.float64)-float(center_intensity))
+    range_gaussian = gaussian_kernel(sigma,neighbor_intensities-center_intensity)
     return range_gaussian
 
 def convolution(img, f):
@@ -113,10 +113,11 @@ def bilateral_filter(input_img, spatial_gaussian,sigma_r):
     pd_img = padding_image(input_img, filter_size)
     pd_img_n,pd_img_m = pd_img.shape
 
+
     for x in range(fa, (pd_img_n-fa)):
         for y in range(fa, (pd_img_m - fa)):
             final_intensity, wp = [0,0]
-            range_gaussian = range_gaussian_component(pd_img,sigma_r,filter_size,x,y)
+            range_gaussian = range_gaussian_component(pd_img.astype(np.float64),sigma_r,filter_size,x,y)
             w_filter = spatial_gaussian * range_gaussian
             w_filter = np.flip(np.flip(w_filter,0),1)
             wp = np.sum(w_filter)
