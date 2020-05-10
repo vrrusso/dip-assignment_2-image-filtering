@@ -4,6 +4,9 @@
 # Course       : scc025 - Digital Image Processing
 # Period       : 2020 First Semester
 #
+#
+# gitsource    : https://github.com/vrrusso/dip-assignment_2-image-filtering
+#
 import numpy as np
 import imageio as im
 import math
@@ -116,6 +119,7 @@ def bilateral_filter(input_img, spatial_gaussian,sigma_r):
     pd_img_n,pd_img_m = pd_img.shape
 
 
+    #applies the convolution
     for x in range(fa, (pd_img_n-fa)):
         for y in range(fa, (pd_img_m - fa)):
             final_intensity, wp = [0,0]

@@ -1,6 +1,6 @@
 # dip-assignment_2-image-filtering
 
-##Authors: Paulo Rocha and Victor Russo
+## Authors: Paulo Rocha and Victor Russo
 
 
 Folders and files:
