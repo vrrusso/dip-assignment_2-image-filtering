@@ -1,5 +1,5 @@
 # Assignment 2 : Image Enhancement and Filtering
-# Authors      : Paulo Rocha nusp
+# Authors      : Paulo Rocha 10892676
 #                Victor R. Russo 11218855
 # Course       : scc025 - Digital Image Processing
 # Period       : 2020 First Semester
@@ -49,7 +49,7 @@ def vignette(img, sigma1, sigma2):
     for i in range(0, m):
         gauss_col[0,i] = gaussian_kernel(sigma2, i-b)
 
-    #multiplying the tow arrays to creatr a gaussian matrix
+    #multiplying the tow arrays to create a gaussian matrix
     f = np.matmul(gauss_row , gauss_col)
 
     #multiplying the original image by the filter
@@ -69,7 +69,7 @@ def spatial_gaussian_component(sigma,size):
 def range_gaussian_component(img,sigma,size,x,y):
     range_gaussian = np.zeros((size,size))
     center_intensity = img[x][y]
-    a = int((size-1)/2)#kernel center
+    a = int((size-1)/2)#kernel's center
     neighbor_intensities = img[x-a:x+a+1,y-a:y+a+1]
     range_gaussian = gaussian_kernel(sigma,neighbor_intensities-center_intensity)
     return range_gaussian
@@ -78,16 +78,16 @@ def convolution(img, f):
     #output image
     out_img = np.zeros(img.shape)
 
-    #fliping the filter in
+    #fliping the filter
     f_flip = np.flip(np.flip(f,0),1)
 
-    #getting the dimensios of the filter
+    #getting filter's dimensios
     f_n,f_m= f.shape
 
     fa = int((f_n-1)/2)
     fb = int((f_m-1)/2)
 
-    #padding the image and getting its dimensions
+    #padding the image and getting it's dimensions
     pd_img = padding_image(img, f_n)
     pd_img_n,pd_img_m = pd_img.shape
 
@@ -109,12 +109,12 @@ def bilateral_filter(input_img, spatial_gaussian,sigma_r):
     out_img = np.zeros(input_img.shape)
 
 
-    #getting the dimensios of the filter
+    #getting filter's dimensios
     filter_size = spatial_gaussian.shape[0]
 
     fa = int((filter_size-1)/2)
 
-    #padding the image and getting its dimensions
+    #padding the image and getting it's dimensions
     pd_img = padding_image(input_img, filter_size)
     pd_img_n,pd_img_m = pd_img.shape
 
